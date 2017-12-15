@@ -1,0 +1,18 @@
+{
+  "name": "ng-vdom",
+  "version": "0.0.1-alpha.0",
+  "license": "MIT",
+  "private": false,
+  "description": "Virtual DOM extension for Angular",
+  "repository": "https://github.com/trotyl/ng-vdom.git",
+  "author": "Trotyl <trotyl@qq.com>",
+  "ngPackage": {
+    "lib": {
+      "entryFile": "public_api.ts"
+    }
+  },
+  "peerDependencies": {
+    "@angular/core": "^5.0.0",
+    "@angular/platform-browser": "^5.0.0"
+  }
+}

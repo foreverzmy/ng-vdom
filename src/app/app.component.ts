@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef } from '@angular/core'
+import { createElement } from 'react'
+import { VdomUtil } from './proxy'
 
 @Component({
   selector: 'app-root',
@@ -6,5 +8,12 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
+  title = 'app'
+  element: TemplateRef<void>
+
+  constructor(private v: VdomUtil) {
+    this.element = v.embed(
+      createElement('p', { className: 'foo' }, 'Hello V-DOM!')
+    )
+  }
 }

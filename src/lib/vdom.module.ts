@@ -1,7 +1,7 @@
 import { ComponentFactoryResolver, Injector, NgModule, TemplateRef } from '@angular/core'
 import { BrowserModule } from '@angular/platform-browser'
 import { BridgeComponent } from './directives/bridge.component'
-import { HostComponent } from './directives/host.component'
+import { OutletComponent } from './directives/outlet.component'
 import { BRIDGE_TEMPLATE } from './providers/bridge-template'
 import { ELEMENT_MANAGER_FACTORY, ElementManagers, NativeElementManagerFactory, TextElementManagerFactory } from './providers/element-manager'
 import { VdomUtil } from './providers/vdom-util'
@@ -15,12 +15,10 @@ export function createBridgeTemplate(cfResolver: ComponentFactoryResolver, injec
 }
 
 @NgModule({
-  imports: [
-    BrowserModule,
-  ],
+  imports: [],
   declarations: [
     BridgeComponent,
-    HostComponent,
+    OutletComponent,
   ],
   entryComponents: [
     BridgeComponent,

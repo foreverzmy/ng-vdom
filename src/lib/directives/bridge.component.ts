@@ -5,7 +5,7 @@ import { BridgeContext } from '../utils/types'
   selector: 'niro-bridge',
   template: `
     <ng-template let-element="element" let-context="context">
-      <niro-host [element]="element" [context]="context"></niro-host>
+      <niro-outlet [element]="element" [context]="context"></niro-outlet>
     </ng-template>
   `
 })

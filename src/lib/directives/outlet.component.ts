@@ -6,24 +6,20 @@ import { ElementDef } from '../utils/types'
   selector: 'niro-outlet',
   template: ``
 })
-export class OutletComponent implements OnChanges, OnDestroy {
+export class Outlet implements OnChanges, OnDestroy {
   @Input() element: ElementDef
   @Input() context: object
 
-  renderer: Renderer2
-
   private manager: ElementManager | null = null
-
-  private get hostElement(): Element {
-    return this.hostElementRef.nativeElement
-  }
+  private parent: Element
 
   constructor(
     rootRenderer: RendererFactory2,
-    private hostElementRef: ElementRef,
+    hostElementRef: ElementRef,
     private managers: ElementManagers,
   ) {
-    this.renderer = rootRenderer.createRenderer(null, null)
+    const renderer = rootRenderer.createRenderer(null, null)
+    this.parent = renderer.parentNode(hostElementRef.nativeElement)
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -42,8 +38,7 @@ export class OutletComponent implements OnChanges, OnDestroy {
     this.clearView()
 
     const factory = this.managers.find(this.element)
-    const parent = this.renderer.parentNode(this.hostElement)
-    this.manager = factory.create(this.element, parent)
+    this.manager = factory.create(this.element, this.parent)
   }
 
   private clearView(): void {
@@ -53,6 +48,8 @@ export class OutletComponent implements OnChanges, OnDestroy {
   }
 
   private applyChanges(): void {
-    this.manager.update({ ...this.element.props, ...this.context })
+    const { children: rawChildren = [], ...props } = { ...this.element.props, ...this.context }
+    const children = Array.isArray(rawChildren) ? rawChildren : [rawChildren]
+    this.manager!.update(props, children)
   }
 }

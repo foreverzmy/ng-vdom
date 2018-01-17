@@ -4,15 +4,17 @@ import { ChildDef, NativeElementDef } from '../utils/types'
 export const ELEMENT_MANAGER_FACTORY = new InjectionToken<ElementManagerFactory[]>('ElementManagerFactory')
 
 export interface ElementManager {
-  update(props: any): void
+  update(props: any, children: ChildDef[]): void
   destroy(): void
 }
 
 export class TextElementManager implements ElementManager {
   private text: Text
+  private renderer: Renderer2
 
-  constructor(content: string, private parent: Element, private renderer: Renderer2) {
-    this.text = renderer.createText(content)
+  constructor(content: string, private parent: Element, managers: ElementManagers) {
+    this.renderer = managers.renderer
+    this.text = this.renderer.createText(content)
     this.renderer.appendChild(this.parent, this.text)
   }
 
@@ -25,33 +27,52 @@ export class TextElementManager implements ElementManager {
 
 export class NativeElementManager implements ElementManager {
   private element: Element
+  private renderer: Renderer2
+  private kvDiffers: KeyValueDiffers
+  private iterDiffers: IterableDiffers
   private childManagers: ElementManager[] = []
+  private propsDiffer?: KeyValueDiffer<string, any>
+  private childrenDiffer?: IterableDiffer<ChildDef>
 
   constructor(
-    private elementDef: NativeElementDef,
+    private type: string,
     private parent: Element,
-    private renderer: Renderer2,
-    private propsDiffer: KeyValueDiffer<string, any>,
-    private childrenDiffer: IterableDiffer<any>,
     private managers: ElementManagers,
   ) {
-    this.element = renderer.createElement(elementDef.type)
-    this.renderer.appendChild(this.parent, this.element)
+    this.renderer = managers.renderer
+    this.kvDiffers = managers.kvDiffers
+    this.iterDiffers = managers.iterDiffers
+    this.element = this.renderer.createElement(type)
+    this.renderer.appendChild(parent, this.element)
   }
 
-  update(props: any): void {
-    const { children, ...normalProps } = this.elementDef.props
-    const propChanges = this.propsDiffer.diff(normalProps)
-    propChanges.forEachItem(({ key, currentValue }) => {
-      this.renderer.setProperty(this.element, key, currentValue)
-    })
-    const normalizedChildren = Array.isArray(children) ? children : [children]
-    const childChanges = this.childrenDiffer.diff(normalizedChildren)
-    childChanges.forEachAddedItem((record) => {
-      const child = record.item
-      const manager = this.managers.find(child).create(child, this.element)
-      this.childManagers.push(manager)
-    })
+  update(props: any, children: ChildDef[]): void {
+    if (!this.propsDiffer && Object.keys(props).length > 0) {
+      this.propsDiffer = this.kvDiffers.find(props).create()
+    }
+    if (!this.childrenDiffer && children.length > 0) {
+      this.childrenDiffer = this.iterDiffers.find(children).create()
+    }
+
+    if (this.propsDiffer) {
+      const propChanges = this.propsDiffer.diff(props)
+      if (propChanges) {
+        propChanges.forEachItem(({ key, currentValue }) => {
+          this.renderer.setProperty(this.element, key, currentValue)
+        })
+      }
+    }
+
+    if (this.childrenDiffer) {
+      const childChanges = this.childrenDiffer.diff(children)
+      if (childChanges) {
+        childChanges.forEachAddedItem((record) => {
+          const child = record.item
+          const manager = this.managers.find(child).create(child, this.element)
+          this.childManagers.push(manager)
+        })
+      }
+    }
   }
 
   destroy(): void {
@@ -76,52 +97,38 @@ export abstract class ElementManagerFactory {
 
 @Injectable()
 export class TextElementManagerFactory extends ElementManagerFactory {
-  constructor(private rootRenderer: RendererFactory2) { super() }
-
   support(childDef: ChildDef): childDef is string {
     return typeof childDef === 'string'
   }
 
   create(content: string, parent: Element): TextElementManager {
-    return new TextElementManager(content, parent, this.rootRenderer.createRenderer(null, null))
+    return new TextElementManager(content, parent, this.managers)
   }
 }
 
 @Injectable()
 export class NativeElementManagerFactory extends ElementManagerFactory {
-  private renderer: Renderer2
-  private kvDifferFactory: KeyValueDifferFactory
-  private iterDifferFactory: IterableDifferFactory
-
-  constructor(
-    rootRenderer: RendererFactory2,
-    kvDiffers: KeyValueDiffers,
-    iterDiffers: IterableDiffers,
-  ) {
-    super()
-
-    this.renderer = rootRenderer.createRenderer(null, null)
-    this.kvDifferFactory = kvDiffers.find({})
-    this.iterDifferFactory = iterDiffers.find([])
-  }
-
   support(childDef: ChildDef): childDef is NativeElementDef {
-    return (childDef && typeof childDef === 'object') && (typeof childDef.type === 'string')
+    return typeof childDef === 'object' ? (typeof childDef.type === 'string') : false
   }
 
   create(elementDef: NativeElementDef, parent: Element): NativeElementManager {
-    const kvDiffer = this.kvDifferFactory.create<string, any>()
-    const iterDiffer = this.iterDifferFactory.create()
-    return new NativeElementManager(elementDef, parent, this.renderer, kvDiffer, iterDiffer, this.managers)
+    return new NativeElementManager(elementDef.type, parent, this.managers)
   }
 }
 
 @Injectable()
 export class ElementManagers {
+  renderer: Renderer2
+
   constructor(
+    public kvDiffers: KeyValueDiffers,
+    public iterDiffers: IterableDiffers,
     @Inject(ELEMENT_MANAGER_FACTORY) private factories: ElementManagerFactory[],
+    rootRenderer: RendererFactory2
   ) {
     factories.forEach(x => x.register(this))
+    this.renderer = rootRenderer.createRenderer(null, null)
   }
 
   find(element: ChildDef): ElementManagerFactory {

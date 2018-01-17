@@ -9,6 +9,6 @@ import { BridgeContext } from '../utils/types'
     </ng-template>
   `
 })
-export class BridgeComponent {
+export class Bridge {
   @ViewChild(TemplateRef) template: TemplateRef<BridgeContext>
 }

@@ -61,4 +61,26 @@ describe('ElementManager', () => {
     managers.find(content).create(content, host).update({}, [span1, ' ', span2, '!'])
     expect(host.innerHTML).toBe('<p><span>Hello</span> <span>World</span>!</p>')
   }))
+
+  it(`should support appending children`, inject([ElementManagers], (managers: ElementManagers) => {
+    const content = { type: 'p', props: {} }
+    const span1 = { type: 'span', props: { children: ['Hello'] } }
+    const span2 = { type: 'span', props: { children: ['World'] } }
+    const manager = managers.find(content).create(content, host)
+
+    manager.update({}, [span1])
+    manager.update({}, [span1, ' ', span2])
+    expect(host.innerHTML).toBe('<p><span>Hello</span> <span>World</span></p>')
+  }))
+
+  it(`should support removing children`, inject([ElementManagers], (managers: ElementManagers) => {
+    const content = { type: 'p', props: {} }
+    const span1 = { type: 'span', props: { children: ['Hello'] } }
+    const span2 = { type: 'span', props: { children: ['World'] } }
+    const manager = managers.find(content).create(content, host)
+
+    manager.update({}, [span1, ' ', span2, '!'])
+    manager.update({}, [span1, ' ', span2])
+    expect(host.innerHTML).toBe('<p><span>Hello</span> <span>World</span></p>')
+  }))
 })

@@ -64,6 +64,12 @@ export class NativeElementManager implements ElementManager {
           const manager = this.host.find(child).create(child, this.element)
           this.childManagers.set(child, manager)
         })
+        childChanges.forEachRemovedItem((record) => {
+          const child = record.item
+          const manager = this.childManagers.get(child)!
+          manager.destroy()
+          this.childManagers.delete(child)
+        })
         childChanges.forEachItem((record) => {
           const child = record.item
           const manager = this.childManagers.get(child)!

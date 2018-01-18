@@ -1,5 +1,6 @@
-import { Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, Renderer2, RendererFactory2 } from '@angular/core'
+import { Component, ElementRef, Input, OnChanges, OnDestroy, RendererFactory2, SimpleChanges } from '@angular/core'
 import { ElementManager, ElementManagers } from '../providers/element-manager'
+import { normalizeProps } from '../utils/lang'
 import { ElementDef } from '../utils/types'
 
 @Component({
@@ -48,8 +49,7 @@ export class Outlet implements OnChanges, OnDestroy {
   }
 
   private applyChanges(): void {
-    const { children: rawChildren = [], ...props } = { ...this.element.props, ...this.context }
-    const children = Array.isArray(rawChildren) ? rawChildren : [rawChildren]
+    const { props, children } = normalizeProps(this.element, this.context)
     this.manager!.update(props, children)
   }
 }

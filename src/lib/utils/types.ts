@@ -1,4 +1,4 @@
-import { Type, ViewContainerRef, ViewRef } from '@angular/core'
+import { Type } from '@angular/core'
 
 export interface TypedChange<T> {
   previousValue: T

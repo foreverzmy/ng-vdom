@@ -1,7 +1,5 @@
-import { Component, TemplateRef } from '@angular/core'
-import { async, inject, TestBed } from '@angular/core/testing'
-import { By } from '@angular/platform-browser'
-import { createElement } from 'react'
+import { Component } from '@angular/core'
+import { async, TestBed } from '@angular/core/testing'
 import { ElementManager, ElementManagerFactory, ElementManagers } from '../providers/element-manager'
 import { Outlet } from './outlet.component'
 
@@ -70,6 +68,6 @@ describe('Outlet Component', () => {
   `
 })
 class TestComponent {
-  element = createElement('p', { a: 1 })
+  element = { type: 'p', props: { a: 1 } }
   context = { b: 2 }
 }

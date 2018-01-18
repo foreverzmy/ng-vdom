@@ -1,4 +1,3 @@
-import { Component, IterableDiffers, KeyValueDiffers, Renderer2 } from '@angular/core'
 import { async, inject, TestBed } from '@angular/core/testing'
 import { DOCUMENT } from '@angular/common'
 import { ElementManagers, ELEMENT_MANAGER_FACTORY, NativeElementManagerFactory, TextElementManagerFactory } from './element-manager'
@@ -46,5 +45,20 @@ describe('ElementManager', () => {
     managers.find(content).create(content, host).update({}, ['Hello World!'])
 
     expect(host.innerHTML).toBe('<p>Hello World!</p>')
+  }))
+
+  it(`should render element with single element child`, inject([ElementManagers], (managers: ElementManagers) => {
+    const content = { type: 'p', props: {} }
+    const span = { type: 'span', props: { children: ['Hello World!'] } }
+    managers.find(content).create(content, host).update({}, [span])
+    expect(host.innerHTML).toBe('<p><span>Hello World!</span></p>')
+  }))
+
+  it(`should render element with mixed children`, inject([ElementManagers], (managers: ElementManagers) => {
+    const content = { type: 'p', props: {} }
+    const span1 = { type: 'span', props: { children: ['Hello'] } }
+    const span2 = { type: 'span', props: { children: ['World'] } }
+    managers.find(content).create(content, host).update({}, [span1, ' ', span2, '!'])
+    expect(host.innerHTML).toBe('<p><span>Hello</span> <span>World</span>!</p>')
   }))
 })

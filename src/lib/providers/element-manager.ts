@@ -50,6 +50,10 @@ export class NativeElementManager implements ElementManager {
     if (this.propsDiffer) {
       const propChanges = this.propsDiffer.diff(props)
       if (propChanges) {
+        propChanges.forEachRemovedItem(({ key }) => {
+          console.log(key)
+          this.host.renderer.setProperty(this.element, key, '')
+        })
         propChanges.forEachItem(({ key, currentValue }) => {
           this.host.renderer.setProperty(this.element, key, currentValue)
         })

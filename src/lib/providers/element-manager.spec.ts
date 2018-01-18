@@ -1,9 +1,10 @@
 import { async, inject, TestBed } from '@angular/core/testing'
 import { DOCUMENT } from '@angular/common'
-import { ElementManagers, ELEMENT_MANAGER_FACTORY, NativeElementManagerFactory, TextElementManagerFactory } from './element-manager'
+import { ElementManager, ElementManagers, ELEMENT_MANAGER_FACTORY, NativeElementManagerFactory, TextElementManagerFactory } from './element-manager'
 
 describe('ElementManager', () => {
   let host: Element
+  let manager: ElementManager
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -19,30 +20,60 @@ describe('ElementManager', () => {
     host = doc.createElement('div')
   }))
 
+  afterEach(() => {
+    manager.destroy()
+  })
+
   it(`should render text content`, inject([ElementManagers], (managers: ElementManagers) => {
     const content = `Hello World!`
-    managers.find(content).create(content, host)
+    manager = managers.find(content).create(content, host)
 
     expect(host.innerHTML).toBe('Hello World!')
   }))
 
   it(`should render empty element`, inject([ElementManagers], (managers: ElementManagers) => {
     const content = { type: 'input', props: {} }
-    managers.find(content).create(content, host).update({}, [])
+    manager = managers.find(content).create(content, host)
+
+    manager.update({}, [])
 
     expect(host.innerHTML).toBe('<input>')
   }))
 
   it(`should render element with properties`, inject([ElementManagers], (managers: ElementManagers) => {
     const content = { type: 'input', props: {} }
-    managers.find(content).create(content, host).update({ className: 'foo', type: 'text' }, [])
+    manager = managers.find(content).create(content, host)
+
+    manager.update({ className: 'foo', type: 'text' }, [])
 
     expect(host.innerHTML).toBe('<input class="foo" type="text">')
   }))
 
+  it(`should support appending properties`, inject([ElementManagers], (managers: ElementManagers) => {
+    const content = { type: 'input', props: {} }
+    manager = managers.find(content).create(content, host)
+
+    manager.update({ className: 'foo' }, [])
+    manager.update({ className: 'foo', type: 'text' }, [])
+
+    expect(host.innerHTML).toBe('<input class="foo" type="text">')
+  }))
+
+  it(`should support removing properties`, inject([ElementManagers], (managers: ElementManagers) => {
+    const content = { type: 'input', props: {} }
+    manager = managers.find(content).create(content, host)
+
+    manager.update({ className: 'foo', type: 'text' }, [])
+    manager.update({ className: 'foo' }, [])
+
+    expect(host.innerHTML).toBe('<input class="foo" type="">')
+  }))
+
   it(`should render element with text child`, inject([ElementManagers], (managers: ElementManagers) => {
     const content = { type: 'p', props: {} }
-    managers.find(content).create(content, host).update({}, ['Hello World!'])
+    manager = managers.find(content).create(content, host)
+
+    manager.update({}, ['Hello World!'])
 
     expect(host.innerHTML).toBe('<p>Hello World!</p>')
   }))
@@ -50,7 +81,10 @@ describe('ElementManager', () => {
   it(`should render element with single element child`, inject([ElementManagers], (managers: ElementManagers) => {
     const content = { type: 'p', props: {} }
     const span = { type: 'span', props: { children: ['Hello World!'] } }
-    managers.find(content).create(content, host).update({}, [span])
+    manager = managers.find(content).create(content, host)
+
+    manager.update({}, [span])
+
     expect(host.innerHTML).toBe('<p><span>Hello World!</span></p>')
   }))
 
@@ -58,7 +92,10 @@ describe('ElementManager', () => {
     const content = { type: 'p', props: {} }
     const span1 = { type: 'span', props: { children: ['Hello'] } }
     const span2 = { type: 'span', props: { children: ['World'] } }
-    managers.find(content).create(content, host).update({}, [span1, ' ', span2, '!'])
+    manager = managers.find(content).create(content, host)
+
+    manager.update({}, [span1, ' ', span2, '!'])
+
     expect(host.innerHTML).toBe('<p><span>Hello</span> <span>World</span>!</p>')
   }))
 
@@ -66,10 +103,11 @@ describe('ElementManager', () => {
     const content = { type: 'p', props: {} }
     const span1 = { type: 'span', props: { children: ['Hello'] } }
     const span2 = { type: 'span', props: { children: ['World'] } }
-    const manager = managers.find(content).create(content, host)
+    manager = managers.find(content).create(content, host)
 
     manager.update({}, [span1])
     manager.update({}, [span1, ' ', span2])
+
     expect(host.innerHTML).toBe('<p><span>Hello</span> <span>World</span></p>')
   }))
 
@@ -77,7 +115,7 @@ describe('ElementManager', () => {
     const content = { type: 'p', props: {} }
     const span1 = { type: 'span', props: { children: ['Hello'] } }
     const span2 = { type: 'span', props: { children: ['World'] } }
-    const manager = managers.find(content).create(content, host)
+    manager = managers.find(content).create(content, host)
 
     manager.update({}, [span1, ' ', span2, '!'])
     manager.update({}, [span1, ' ', span2])

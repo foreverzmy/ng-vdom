@@ -103,7 +103,7 @@ describe('ElementManager', () => {
     expect(toHtml(ctrl)).toBe('<p><span>Hello</span> <span>World</span>!</p>')
   }))
 
-  xit(`should support appending children`, inject([ViewControllers], (ctrls: ViewControllers) => {
+  it(`should support appending children`, inject([ViewControllers], (ctrls: ViewControllers) => {
     ctrl = ctrls.create('p')
 
     ctrl.update(makeElement('p', {}, [makeElement('span', {}, [makeText('Hello')])]))
@@ -116,7 +116,7 @@ describe('ElementManager', () => {
     expect(toHtml(ctrl)).toBe('<p><span>Hello</span> <span>World</span></p>')
   }))
 
-  xit(`should support removing children`, inject([ViewControllers], (ctrls: ViewControllers) => {
+  it(`should support removing children`, inject([ViewControllers], (ctrls: ViewControllers) => {
     ctrl = ctrls.create('p')
 
     ctrl.update(makeElement('p', {}, [
@@ -131,6 +131,25 @@ describe('ElementManager', () => {
     ]))
 
     expect(toHtml(ctrl)).toBe('<p><span>World</span>!</p>')
+  }))
+
+  it(`should support swap children`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('p')
+
+    ctrl.update(makeElement('p', {}, [
+      makeElement('span', {}, [makeText('Hello')]),
+      makeText(' '),
+      makeElement('span', {}, [makeText('World')]),
+      makeText('!'),
+    ]))
+    ctrl.update(makeElement('p', {}, [
+      makeElement('span', {}, [makeText('World')]),
+      makeText(' '),
+      makeElement('span', {}, [makeText('Hello')]),
+      makeText('!'),
+    ]))
+
+    expect(toHtml(ctrl)).toBe('<p><span>World</span> <span>Hello</span>!</p>')
   }))
 })
 

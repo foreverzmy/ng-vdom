@@ -169,13 +169,33 @@ describe('ElementManager', () => {
       makeText('!'),
     ]))
     ctrl.update(makeElement('p', {}, [
+      makeText('!'),
+      makeText(' '),
+      makeElement('span', {}, [makeText('World')]),
+      makeElement('span', {}, [makeText('Hello')]),
+    ]))
+
+    expect(toHtml(ctrl)).toBe('<p>! <span>World</span><span>Hello</span></p>')
+  }))
+
+  it(`should support insert children`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('p')
+
+    ctrl.update(makeElement('p', {}, [
+      makeElement('span', {}, [makeText('Hello')]),
+      makeText(' '),
+      makeElement('span', {}, [makeText('World')]),
+      makeText('!'),
+    ]))
+    ctrl.update(makeElement('p', {}, [
       makeElement('span', {}, [makeText('World')]),
       makeText(' '),
+      makeElement('i'),
       makeElement('span', {}, [makeText('Hello')]),
       makeText('!'),
     ]))
 
-    expect(toHtml(ctrl)).toBe('<p><span>World</span> <span>Hello</span>!</p>')
+    expect(toHtml(ctrl)).toBe('<p><span>World</span> <i></i><span>Hello</span>!</p>')
   }))
 })
 

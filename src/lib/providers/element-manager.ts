@@ -88,19 +88,38 @@ export class NativeViewController implements ViewController {
   private updateChildrenDynamic(changes: IterableChanges<string>, map: { [key: string]: [ViewData, number] }): void {
     const entries = Object.entries(map)
     const current = { length: entries.length } as Children
+    let queue: number[] = []
+
     for (const [key, [view, index]] of entries) {
       const exists = key in this.children
       const ctrl = current[key] = exists ? this.children[key] : this.host.create(view.type)
       current[index] = ctrl.node
       if (!exists) {
-        this.host.renderer.appendChild(this.node, ctrl.node)
+        queue.push(index)
       }
       ctrl.update(view)
     }
 
     changes.forEachRemovedItem((record) => {
-      this.host.renderer.removeChild(this.node, this.children[record.item].node)
+      this.host.renderer.removeChild(this.node, this.children[record.previousIndex!])
     })
+
+    changes.forEachMovedItem((record) => {
+      queue.push(record.currentIndex!)
+      this.host.renderer.removeChild(this.node, current[record.currentIndex!])
+    })
+
+    queue = queue.sort()
+
+    for (let i = queue.length - 1; i >= 0; i--) {
+      const node = current[queue[i]]
+      if (queue[i] === current.length - 1) {
+        this.host.renderer.appendChild(this.node, node)
+      } else {
+        const next = current[queue[i] + 1]
+        this.host.renderer.insertBefore(this.node, node, next)
+      }
+    }
 
     this.children = current
   }

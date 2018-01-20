@@ -1,5 +1,5 @@
 import { async, inject, TestBed } from '@angular/core/testing'
-import { DOCUMENT } from '@angular/common'
+import { CommonModule, DOCUMENT } from '@angular/common'
 import { ViewController, ViewData } from '../utils/types'
 import { ELEMENT_MANAGER_FACTORY, NativeViewControllerFactory, TextViewControllerFactory, ViewControllers } from './element-manager'
 
@@ -46,7 +46,7 @@ describe('ElementManager', () => {
     expect(toHtml(ctrl)).toBe('<input>')
   }))
 
-  it(`should render element with properties`, inject([ViewControllers], (ctrls: ViewControllers) => {
+  it(`should support static properties`, inject([ViewControllers], (ctrls: ViewControllers) => {
     ctrl = ctrls.create('input')
 
     ctrl.update(makeElement('input', { tabIndex: 1, type: 'text' }))
@@ -70,6 +70,32 @@ describe('ElementManager', () => {
     ctrl.update(makeElement('input', { tabIndex: 1 }))
 
     expect(toHtml(ctrl)).toBe('<input tabindex="1" type="">')
+  }))
+
+  it(`should support static className`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('input')
+
+    ctrl.update(makeElement('input', { className: 'foo' }))
+
+    expect(toHtml(ctrl)).toBe('<input class="foo">')
+  }))
+
+  it(`should support appending className`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('input')
+
+    ctrl.update(makeElement('input', { className: ['foo'] }))
+    ctrl.update(makeElement('input', { className: ['foo', 'bar'] }))
+
+    expect(toHtml(ctrl)).toBe('<input class="foo bar">')
+  }))
+
+  it(`should support removing className`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('input')
+
+    ctrl.update(makeElement('input', { className: ['foo', 'bar'] }))
+    ctrl.update(makeElement('input', { className: ['bar'] }))
+
+    expect(toHtml(ctrl)).toBe('<input class="bar">')
   }))
 
   it(`should render element with text child`, inject([ViewControllers], (ctrls: ViewControllers) => {

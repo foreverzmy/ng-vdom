@@ -1,17 +1,23 @@
 import { async, inject, TestBed } from '@angular/core/testing'
 import { DOCUMENT } from '@angular/common'
-import { ElementManager, ElementManagers, ELEMENT_MANAGER_FACTORY, NativeElementManagerFactory, TextElementManagerFactory } from './element-manager'
+import { ViewController, ViewData } from '../utils/types'
+import { ELEMENT_MANAGER_FACTORY, NativeViewControllerFactory, TextViewControllerFactory, ViewControllers } from './element-manager'
 
 describe('ElementManager', () => {
   let host: Element
-  let manager: ElementManager
+  let ctrl: ViewController
+
+  function toHtml(controller: ViewController): string {
+    host.appendChild(controller.node)
+    return host.innerHTML
+  }
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: ELEMENT_MANAGER_FACTORY, useClass: NativeElementManagerFactory, multi: true },
-        { provide: ELEMENT_MANAGER_FACTORY, useClass: TextElementManagerFactory, multi: true },
-        ElementManagers,
+        { provide: ELEMENT_MANAGER_FACTORY, useClass: TextViewControllerFactory, multi: true },
+        { provide: ELEMENT_MANAGER_FACTORY, useClass: NativeViewControllerFactory, multi: true },
+        ViewControllers,
       ]
     })
   }))
@@ -21,104 +27,132 @@ describe('ElementManager', () => {
   }))
 
   afterEach(() => {
-    manager.destroy()
+    ctrl.destroy()
   })
 
-  it(`should render text content`, inject([ElementManagers], (managers: ElementManagers) => {
-    const content = `Hello World!`
-    manager = managers.find(content).create(content, host)
+  it(`should render text content`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('$text')
 
-    expect(host.innerHTML).toBe('Hello World!')
+    ctrl.update(makeText(`Hello World!`))
+
+    expect(toHtml(ctrl)).toBe('Hello World!')
   }))
 
-  it(`should render empty element`, inject([ElementManagers], (managers: ElementManagers) => {
-    const content = { type: 'input', props: {} }
-    manager = managers.find(content).create(content, host)
+  it(`should render empty element`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('input')
 
-    manager.update({}, [])
+    ctrl.update(makeElement('input'))
 
-    expect(host.innerHTML).toBe('<input>')
+    expect(toHtml(ctrl)).toBe('<input>')
   }))
 
-  it(`should render element with properties`, inject([ElementManagers], (managers: ElementManagers) => {
-    const content = { type: 'input', props: {} }
-    manager = managers.find(content).create(content, host)
+  it(`should render element with properties`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('input')
 
-    manager.update({ className: 'foo', type: 'text' }, [])
+    ctrl.update(makeElement('input', { tabIndex: 1, type: 'text' }))
 
-    expect(host.innerHTML).toBe('<input class="foo" type="text">')
+    expect(toHtml(ctrl)).toBe(`<input tabindex="1" type="text">`)
   }))
 
-  it(`should support appending properties`, inject([ElementManagers], (managers: ElementManagers) => {
-    const content = { type: 'input', props: {} }
-    manager = managers.find(content).create(content, host)
+  it(`should support appending properties`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('input')
 
-    manager.update({ className: 'foo' }, [])
-    manager.update({ className: 'foo', type: 'text' }, [])
+    ctrl.update(makeElement('input', { tabIndex: 1 }))
+    ctrl.update(makeElement('input', { tabIndex: 1, type: 'text' }))
 
-    expect(host.innerHTML).toBe('<input class="foo" type="text">')
+    expect(toHtml(ctrl)).toBe('<input tabindex="1" type="text">')
   }))
 
-  it(`should support removing properties`, inject([ElementManagers], (managers: ElementManagers) => {
-    const content = { type: 'input', props: {} }
-    manager = managers.find(content).create(content, host)
+  it(`should support removing properties`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('input')
 
-    manager.update({ className: 'foo', type: 'text' }, [])
-    manager.update({ className: 'foo' }, [])
+    ctrl.update(makeElement('input', { tabIndex: 1, type: 'text' }))
+    ctrl.update(makeElement('input', { tabIndex: 1 }))
 
-    expect(host.innerHTML).toBe('<input class="foo" type="">')
+    expect(toHtml(ctrl)).toBe('<input tabindex="1" type="">')
   }))
 
-  it(`should render element with text child`, inject([ElementManagers], (managers: ElementManagers) => {
-    const content = { type: 'p', props: {} }
-    manager = managers.find(content).create(content, host)
+  it(`should render element with text child`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('p')
 
-    manager.update({}, ['Hello World!'])
+    ctrl.update(makeElement('p', {}, [makeText('Hello World!')]))
 
-    expect(host.innerHTML).toBe('<p>Hello World!</p>')
+    expect(toHtml(ctrl)).toBe('<p>Hello World!</p>')
   }))
 
-  it(`should render element with single element child`, inject([ElementManagers], (managers: ElementManagers) => {
+  it(`should render element with single element child`, inject([ViewControllers], (ctrls: ViewControllers) => {
     const content = { type: 'p', props: {} }
     const span = { type: 'span', props: { children: ['Hello World!'] } }
-    manager = managers.find(content).create(content, host)
+    ctrl = ctrls.create('p')
 
-    manager.update({}, [span])
+    ctrl.update(makeElement('p', {}, [makeElement('span', {}, [makeText('Hello World!')])]))
 
-    expect(host.innerHTML).toBe('<p><span>Hello World!</span></p>')
+    expect(toHtml(ctrl)).toBe('<p><span>Hello World!</span></p>')
   }))
 
-  it(`should render element with mixed children`, inject([ElementManagers], (managers: ElementManagers) => {
-    const content = { type: 'p', props: {} }
-    const span1 = { type: 'span', props: { children: ['Hello'] } }
-    const span2 = { type: 'span', props: { children: ['World'] } }
-    manager = managers.find(content).create(content, host)
+  it(`should render element with mixed children`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('p')
 
-    manager.update({}, [span1, ' ', span2, '!'])
+    ctrl.update(makeElement('p', {}, [
+      makeElement('span', {}, [makeText('Hello')]),
+      makeText(' '),
+      makeElement('span', {}, [makeText('World')]),
+      makeText('!'),
+    ]))
 
-    expect(host.innerHTML).toBe('<p><span>Hello</span> <span>World</span>!</p>')
+    expect(toHtml(ctrl)).toBe('<p><span>Hello</span> <span>World</span>!</p>')
   }))
 
-  it(`should support appending children`, inject([ElementManagers], (managers: ElementManagers) => {
-    const content = { type: 'p', props: {} }
-    const createSpan1 = () => ({ type: 'span', props: { children: ['Hello'] } })
-    const createSpan2 = () => ({ type: 'span', props: { children: ['World'] } })
-    manager = managers.find(content).create(content, host)
+  xit(`should support appending children`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('p')
 
-    manager.update({}, [createSpan1()])
-    manager.update({}, [createSpan1(), ' ', createSpan2()])
+    ctrl.update(makeElement('p', {}, [makeElement('span', {}, [makeText('Hello')])]))
+    ctrl.update(makeElement('p', {}, [
+      makeElement('span', {}, [makeText('Hello')]),
+      makeText(' '),
+      makeElement('span', {}, [makeText('World')]),
+    ]))
 
-    expect(host.innerHTML).toBe('<p><span>Hello</span> <span>World</span></p>')
+    expect(toHtml(ctrl)).toBe('<p><span>Hello</span> <span>World</span></p>')
   }))
 
-  xit(`should support removing children`, inject([ElementManagers], (managers: ElementManagers) => {
-    const content = { type: 'p', props: {} }
-    const createSpan1 = () => ({ type: 'span', props: { children: ['Hello'] } })
-    const createSpan2 = () => ({ type: 'span', props: { children: ['World'] } })
-    manager = managers.find(content).create(content, host)
+  xit(`should support removing children`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('p')
 
-    manager.update({}, [createSpan1(), ' ', createSpan2(), '!'])
-    manager.update({}, [createSpan1(), ' ', createSpan2()])
-    expect(host.innerHTML).toBe('<p><span>Hello</span> <span>World</span></p>')
+    ctrl.update(makeElement('p', {}, [
+      makeElement('span', {}, [makeText('Hello')]),
+      makeText(' '),
+      makeElement('span', {}, [makeText('World')]),
+      makeText('!'),
+    ]))
+    ctrl.update(makeElement('p', {}, [
+      makeElement('span', {}, [makeText('World')]),
+      makeText('!'),
+    ]))
+
+    expect(toHtml(ctrl)).toBe('<p><span>World</span>!</p>')
   }))
 })
+
+function makeText(content: string): ViewData {
+  return {
+    type: '$text',
+    className: null,
+    style: null,
+    props: { textContent: content },
+    children: null,
+    key: null,
+  }
+}
+
+function makeElement(type: string, properties?: { [name: string]: any }, children?: ViewData[]): ViewData {
+  const { className, style, ...props } = properties || {} as any
+  return {
+    type,
+    className,
+    style,
+    props,
+    children: children || null,
+    key: null,
+  }
+}

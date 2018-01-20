@@ -13,7 +13,7 @@ export type TypedChanges<C> = {
 
 export interface ElementDef {
   type: string | Type<any>
-  props: { children?: ChildDef | ChildDef[], [prop: string]: any }
+  props: { children?: NodeDef | NodeDef[], [prop: string]: any }
   key?: string | number
 }
 
@@ -25,7 +25,22 @@ export interface ComponentElementDef extends ElementDef {
   type: Type<any>
 }
 
-export type ChildDef = ElementDef | string
+export type NodeDef = ElementDef | string
+
+export interface ViewData {
+  type: string | Type<any>
+  className: string | string[] | { [name: string]: boolean } | null
+  style: { [name: string]: string } | null
+  props: { [name: string]: any } | null
+  children: ViewData[] | null
+  key: string | number | null
+}
+
+export interface ViewController {
+  node: Node
+  update(data: ViewData): void
+  destroy(): void
+}
 
 export interface BridgeContext {
   element: ElementDef

@@ -1,23 +1,21 @@
 import { Component } from '@angular/core'
-import { async, TestBed } from '@angular/core/testing'
-import { ElementManager, ElementManagerFactory, ElementManagers } from '../providers/element-manager'
+import { async, inject, TestBed } from '@angular/core/testing'
+import { DOCUMENT } from '@angular/common'
+import { ViewControllers } from '../providers/element-manager'
+import { ViewController } from '../utils/types'
 import { Outlet } from './outlet.component'
 
 describe('Outlet Component', () => {
-  let manager: ElementManager
-  let managerFactory: ElementManagerFactory
-  let managers: ElementManagers
+  let ctrl: ViewController
+  let ctrls: ViewControllers
 
   beforeEach(() => {
-    manager = {
+    ctrl = {
       update() { },
       destroy() { },
     } as any
-    managerFactory = {
+    ctrls = {
       create() { },
-    } as any
-    managers = {
-      find() { },
     } as any
   })
 
@@ -28,16 +26,19 @@ describe('Outlet Component', () => {
         TestComponent,
       ],
       providers: [
-        { provide: ElementManagers, useFactory: () => managers }
+        { provide: ViewControllers, useFactory: () => ctrls }
       ]
     }).compileComponents()
   }))
 
+  beforeEach(inject([DOCUMENT], (doc: Document) => {
+    ctrl.node = doc.createElement('span')
+  }))
+
   beforeEach(async(() => {
-    spyOn(managers, 'find').and.returnValue(managerFactory)
-    spyOn(managerFactory, 'create').and.returnValue(manager)
-    spyOn(manager, 'update')
-    spyOn(manager, 'destroy')
+    spyOn(ctrls, 'create').and.returnValue(ctrl)
+    spyOn(ctrl, 'update')
+    spyOn(ctrl, 'destroy')
   }))
 
   it(`should render element on parent`, () => {
@@ -47,9 +48,15 @@ describe('Outlet Component', () => {
 
     fixture.detectChanges()
 
-    expect(managers.find).toHaveBeenCalled()
-    expect(managerFactory.create).toHaveBeenCalledWith(testComp.element, testCompHost)
-    expect(manager.update).toHaveBeenCalledWith({ a: 1, b: 2 }, [])
+    expect(ctrls.create).toHaveBeenCalledWith('p')
+    expect(ctrl.update).toHaveBeenCalledWith({
+      type: 'p',
+      className: null,
+      style: null,
+      props: { a: 1, b: 2 },
+      children: null,
+      key: null,
+    })
   })
 
   it(`should remove element when destroyed`, () => {
@@ -58,7 +65,7 @@ describe('Outlet Component', () => {
     fixture.detectChanges()
     fixture.destroy()
 
-    expect(manager.destroy).toHaveBeenCalled()
+    expect(ctrl.destroy).toHaveBeenCalled()
   })
 })
 

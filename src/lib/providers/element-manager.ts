@@ -1,5 +1,5 @@
 import { ElementRef, Inject, Injectable, InjectionToken, IterableChanges, IterableDiffer, IterableDiffers, KeyValueChanges, KeyValueDiffer, KeyValueDiffers, Renderer2, RendererFactory2, Type } from '@angular/core'
-import { NgClass } from '@angular/common'
+import { NgClass, NgStyle } from '@angular/common'
 import { generateKeys } from '../utils/lang'
 import { ViewController, ViewData } from '../utils/types'
 
@@ -27,7 +27,8 @@ export class NativeViewController implements ViewController {
   private children: Children = { length: 0 } as Children
   private propsDiffer?: KeyValueDiffer<string, any>
   private childrenDiffer?: IterableDiffer<string>
-  private ngClass: NgClass
+  private ngClass?: NgClass
+  private ngStyle?: NgStyle
 
   constructor(private host: ViewControllers, private type: string) {
     this.node = host.renderer.createElement(type)
@@ -45,6 +46,13 @@ export class NativeViewController implements ViewController {
         this.host.renderer,
       )
     }
+    if (!this.ngStyle && view.style) {
+      this.ngStyle = new NgStyle(
+        this.host.kvDiffers,
+        new ElementRef(this.node),
+        this.host.renderer,
+      )
+    }
     if (!this.childrenDiffer && view.children) {
       this.childrenDiffer = this.host.iterDiffers.find(view.children).create()
     }
@@ -57,6 +65,10 @@ export class NativeViewController implements ViewController {
     if (this.ngClass) {
       this.ngClass.ngClass = view.className || ''
       this.ngClass.ngDoCheck()
+    }
+    if (this.ngStyle) {
+      this.ngStyle.ngStyle = view.style || {}
+      this.ngStyle.ngDoCheck()
     }
     if (this.childrenDiffer) {
       const { keys, map } = generateKeys(view.children || [])

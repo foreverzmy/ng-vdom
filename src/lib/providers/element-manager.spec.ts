@@ -98,6 +98,32 @@ describe('ElementManager', () => {
     expect(toHtml(ctrl)).toBe('<input class="bar">')
   }))
 
+  it(`should support static style`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('input')
+
+    ctrl.update(makeElement('input', { style: { height: '100px' } }))
+
+    expect(toHtml(ctrl)).toBe('<input style="height: 100px;">')
+  }))
+
+  it(`should support appending style`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('input')
+
+    ctrl.update(makeElement('input', { style: { height: '100px' } }))
+    ctrl.update(makeElement('input', { style: { height: '100px', width: '100px' } }))
+
+    expect(toHtml(ctrl)).toBe('<input style="height: 100px; width: 100px;">')
+  }))
+
+  it(`should support removing style`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('input')
+
+    ctrl.update(makeElement('input', { style: { height: '100px', width: '100px' } }))
+    ctrl.update(makeElement('input', { style: { width: '100px' } }))
+
+    expect(toHtml(ctrl)).toBe('<input style="width: 100px;">')
+  }))
+
   it(`should render element with text child`, inject([ViewControllers], (ctrls: ViewControllers) => {
     ctrl = ctrls.create('p')
 

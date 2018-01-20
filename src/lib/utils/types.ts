@@ -14,7 +14,7 @@ export type TypedChanges<C> = {
 export interface ElementDef {
   type: string | Type<any>
   props: { children?: NodeDef | NodeDef[], [prop: string]: any }
-  key?: string | number
+  key?: string | number | null
 }
 
 export interface NativeElementDef extends ElementDef {

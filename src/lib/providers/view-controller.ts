@@ -3,7 +3,7 @@ import { NgClass, NgStyle } from '@angular/common'
 import { generateKeys } from '../utils/lang'
 import { ViewController, ViewData } from '../utils/types'
 
-export const ELEMENT_MANAGER_FACTORY = new InjectionToken<ViewControllerFactory[]>('ElementManagerFactory')
+export const VIEW_CONTROLLER_FACTORY = new InjectionToken<ViewControllerFactory[]>('ViewControllerFactory')
 
 type Children = { [key: string]: ViewController } & { [index: number]: Node, length: number }
 
@@ -183,7 +183,7 @@ export class ViewControllers {
   constructor(
     public kvDiffers: KeyValueDiffers,
     public iterDiffers: IterableDiffers,
-    @Inject(ELEMENT_MANAGER_FACTORY) private factories: ViewControllerFactory[],
+    @Inject(VIEW_CONTROLLER_FACTORY) private factories: ViewControllerFactory[],
     rootRenderer: RendererFactory2
   ) {
     factories.forEach(x => x.register(this))

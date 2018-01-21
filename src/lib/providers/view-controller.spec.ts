@@ -1,9 +1,9 @@
 import { async, inject, TestBed } from '@angular/core/testing'
 import { CommonModule, DOCUMENT } from '@angular/common'
 import { ViewController, ViewData } from '../utils/types'
-import { ELEMENT_MANAGER_FACTORY, NativeViewControllerFactory, TextViewControllerFactory, ViewControllers } from './element-manager'
+import { VIEW_CONTROLLER_FACTORY, NativeViewControllerFactory, TextViewControllerFactory, ViewControllers } from './view-controller'
 
-describe('ElementManager', () => {
+describe('ViewController', () => {
   let host: Element
   let ctrl: ViewController
 
@@ -15,8 +15,8 @@ describe('ElementManager', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: ELEMENT_MANAGER_FACTORY, useClass: TextViewControllerFactory, multi: true },
-        { provide: ELEMENT_MANAGER_FACTORY, useClass: NativeViewControllerFactory, multi: true },
+        { provide: VIEW_CONTROLLER_FACTORY, useClass: TextViewControllerFactory, multi: true },
+        { provide: VIEW_CONTROLLER_FACTORY, useClass: NativeViewControllerFactory, multi: true },
         ViewControllers,
       ]
     })

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 import { async, inject, TestBed } from '@angular/core/testing'
 import { DOCUMENT } from '@angular/common'
-import { ViewControllers } from '../providers/element-manager'
+import { ViewControllers } from '../providers/view-controller'
 import { ViewController } from '../utils/types'
 import { Outlet } from './outlet.component'
 

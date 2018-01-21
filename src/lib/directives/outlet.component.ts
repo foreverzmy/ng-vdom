@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnChanges, OnDestroy, Renderer2, RendererFactory2, SimpleChanges } from '@angular/core'
-import { ViewControllers } from '../providers/element-manager'
+import { ViewControllers } from '../providers/view-controller'
 import { generateViewData } from '../utils/lang'
 import { ElementDef, ViewController } from '../utils/types'
 

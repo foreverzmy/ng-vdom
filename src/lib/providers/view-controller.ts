@@ -1,6 +1,6 @@
 import { ElementRef, Inject, Injectable, InjectionToken, IterableChanges, IterableDiffer, IterableDiffers, KeyValueChanges, KeyValueDiffer, KeyValueDiffers, Renderer2, RendererFactory2, Type } from '@angular/core'
 import { NgClass, NgStyle } from '@angular/common'
-import { generateKeys } from '../utils/lang'
+import { generateKeys, getEventName, isEvent } from '../utils/lang'
 import { ViewController, ViewData } from '../utils/types'
 
 export const VIEW_CONTROLLER_FACTORY = new InjectionToken<ViewControllerFactory[]>('ViewControllerFactory')
@@ -25,6 +25,7 @@ export class NativeViewController implements ViewController {
   node: Element
 
   private children: Children = { length: 0 } as Children
+  private listeners: { [eventName: string]: () => void } = {}
   private propsDiffer?: KeyValueDiffer<string, any>
   private childrenDiffer?: IterableDiffer<string>
   private ngClass?: NgClass
@@ -90,10 +91,30 @@ export class NativeViewController implements ViewController {
 
   private updateProps(changes: KeyValueChanges<string, any>): void {
     changes.forEachRemovedItem(({ key }) => {
-      this.host.renderer.setProperty(this.node, key, '')
+      if (isEvent(key)) {
+        const eventName = getEventName(key)
+        this.listeners[eventName]()
+        delete this.listeners[eventName]
+      } else {
+        this.host.renderer.setProperty(this.node, key, '')
+      }
     })
-    changes.forEachItem(({ key, currentValue }) => {
-      this.host.renderer.setProperty(this.node, key, currentValue)
+    changes.forEachAddedItem(({ key, currentValue }) => {
+      if (isEvent(key)) {
+        const eventName = getEventName(key)
+        this.listeners[eventName] = this.host.renderer.listen(this.node, eventName, currentValue)
+      } else {
+        this.host.renderer.setProperty(this.node, key, currentValue)
+      }
+    })
+    changes.forEachChangedItem(({ key, currentValue }) => {
+      if (isEvent(key)) {
+        const eventName = getEventName(key)
+        this.listeners[eventName]()
+        this.listeners[eventName] = this.host.renderer.listen(this.node, eventName, currentValue)
+      } else {
+        this.host.renderer.setProperty(this.node, key, currentValue)
+      }
     })
   }
 

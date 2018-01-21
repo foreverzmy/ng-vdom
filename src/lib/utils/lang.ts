@@ -1,6 +1,14 @@
 import { Type } from '@angular/core'
 import { NodeDef, ViewData } from './types'
 
+export function isEvent(prop: string): boolean {
+  return prop.startsWith('on')
+}
+
+export function getEventName(prop: string): string {
+  return prop.replace('on', '').toLowerCase()
+}
+
 export function generateViewData(node: NodeDef, locals: any = {}): ViewData {
   if (typeof node === 'string') {
     return {

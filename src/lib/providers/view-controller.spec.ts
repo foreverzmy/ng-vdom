@@ -223,6 +223,27 @@ describe('ViewController', () => {
 
     expect(toHtml(ctrl)).toBe('<p><span>World</span> <i></i><span>Hello</span>!</p>')
   }))
+
+  it(`should add event listener`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('button')
+    let flag = false
+
+    ctrl.update(makeElement('button', { onClick: () => flag = true }))
+    ctrl.node.dispatchEvent(new CustomEvent('click'))
+
+    expect(flag).toBe(true)
+  }))
+
+  it(`should remove event listener`, inject([ViewControllers], (ctrls: ViewControllers) => {
+    ctrl = ctrls.create('button')
+    let flag = false
+
+    ctrl.update(makeElement('button', { onClick: () => flag = true }))
+    ctrl.update(makeElement('button', {}))
+    ctrl.node.dispatchEvent(new CustomEvent('click'))
+
+    expect(flag).toBe(false)
+  }))
 })
 
 function makeText(content: string): ViewData {

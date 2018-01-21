@@ -114,6 +114,7 @@ export class NativeViewController implements ViewController {
 
     changes.forEachRemovedItem((record) => {
       this.host.renderer.removeChild(this.node, this.children[record.previousIndex!])
+      this.children[record.item].destroy()
     })
 
     changes.forEachMovedItem((record) => {

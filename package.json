@@ -10,8 +10,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "pregenerate": "rimraf publish",
-    "generate": "ng-packagr -p src/lib/package.json",
-    "postgenerate": "mv src/lib/dist publish",
+    "generate": "./build.sh",
     "release": "cd publish && npm publish"
   },
   "private": true,
@@ -49,6 +48,10 @@
     "ng-packagr": "^1.6.0",
     "protractor": "~5.1.2",
     "react": "^16.2.0",
+    "rollup": "^0.54.1",
+    "rollup-plugin-node-resolve": "^3.0.2",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-uglify": "^3.0.0",
     "ts-node": "~3.2.0",
     "tslint": "~5.7.0",
     "typescript": "~2.4.2"

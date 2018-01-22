@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.app.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "importHelpers": true
+  },
+  "angularCompilerOptions": {
+    "annotateForClosureCompiler": true,
+    "strictMetadataEmit": true,
+    "skipTemplateCodegen": true,
+    "flatModuleOutFile": "vdom.js",
+    "flatModuleId": "ng-vdom"
+  },
+  "files": [
+    "./public-api.ts"
+  ]
+}

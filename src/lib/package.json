@@ -1,6 +1,6 @@
 {
   "name": "ng-vdom",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "private": false,
   "main": "./bundles/vdom.umd.js",

@@ -13,7 +13,10 @@ export class Outlet implements OnChanges, OnDestroy {
 
   private renderer: Renderer2
   private ctrl: ViewController | null = null
-  private parent: Element
+
+  private get parent(): Element {
+    return this.renderer.parentNode(this.hostElementRef.nativeElement)
+  }
 
   constructor(
     rootRenderer: RendererFactory2,
@@ -21,7 +24,6 @@ export class Outlet implements OnChanges, OnDestroy {
     private ctrls: ViewControllers,
   ) {
     this.renderer = rootRenderer.createRenderer(null, null)
-    this.parent = this.renderer.parentNode(hostElementRef.nativeElement)
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -49,7 +51,9 @@ export class Outlet implements OnChanges, OnDestroy {
   }
 
   private applyChanges(): void {
-    const view = generateViewData(this.element, this.context)
+    // TODO: likely to be an tsickle bug, meed to confirm and report
+    /* tslint:disable-next-line:semicolon */
+    const view = generateViewData(this.element, this.context);
     this.ctrl!.update(view)
   }
 }

@@ -51,7 +51,7 @@ export class Outlet implements OnChanges, OnDestroy {
   }
 
   private applyChanges(): void {
-    // TODO: likely to be an tsickle bug, meed to confirm and report
+    // Workaround for https://github.com/angular/tsickle/issues/718
     /* tslint:disable-next-line:semicolon */
     const view = generateViewData(this.element, this.context);
     this.ctrl!.update(view)

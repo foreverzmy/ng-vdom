@@ -121,17 +121,8 @@ export class NativeViewController implements ViewController {
   private updateChildrenDynamic(changes: IterableChanges<string>, map: { [key: string]: [ViewData, number] }): void {
     const entries = Object.entries(map)
     const current = { length: entries.length } as Children
-    let queue: number[] = []
-
-    for (const [key, [view, index]] of entries) {
-      const exists = key in this.children
-      const ctrl = current[key] = exists ? this.children[key] : this.host.create(view.type)
-      current[index] = ctrl.node
-      if (!exists) {
-        queue.push(index)
-      }
-      ctrl.update(view)
-    }
+    const moved: { [index: number]: true } = {}
+    const queue: number[] = []
 
     changes.forEachRemovedItem((record) => {
       this.host.renderer.removeChild(this.node, this.children[record.previousIndex!])
@@ -139,11 +130,19 @@ export class NativeViewController implements ViewController {
     })
 
     changes.forEachMovedItem((record) => {
-      queue.push(record.currentIndex!)
-      this.host.renderer.removeChild(this.node, current[record.currentIndex!])
+      moved[record.currentIndex!] = true
+      this.host.renderer.removeChild(this.node, this.children[record.previousIndex!])
     })
 
-    queue = queue.sort()
+    for (const [key, [view, index]] of entries) {
+      const exists = key in this.children
+      const ctrl = current[key] = exists ? this.children[key] : this.host.create(view.type)
+      current[index] = ctrl.node
+      if (!exists || moved[index]) {
+        queue.push(index)
+      }
+      ctrl.update(view)
+    }
 
     for (let i = queue.length - 1; i >= 0; i--) {
       const node = current[queue[i]]

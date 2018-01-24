@@ -10,12 +10,12 @@ export function getEventName(prop: string): string {
 }
 
 export function generateViewData(node: NodeDef, locals: any = {}): ViewData {
-  if (typeof node === 'string') {
+  if (!node || typeof node !== 'object') {
     return {
       type: '$text',
       className: null,
       style: null,
-      props: { textContent: node },
+      props: { textContent: `${node}` },
       children: null,
       key: null,
     }

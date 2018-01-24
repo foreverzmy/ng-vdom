@@ -25,7 +25,7 @@ export interface ComponentElementDef extends ElementDef {
   type: Type<any>
 }
 
-export type NodeDef = ElementDef | string
+export type NodeDef = ElementDef | string | number | boolean
 
 export interface ViewData {
   type: string | Type<any>

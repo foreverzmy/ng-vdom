@@ -31,5 +31,14 @@ describe('Language utils', () => {
 
       expect(view.type).toBe('p')
     })
+
+    it ('should support null properties', () => {
+      const view = generateViewData({
+        type: 'p',
+        props: null,
+      })
+
+      expect(view.type).toBe('p')
+    })
   })
 })

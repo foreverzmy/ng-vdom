@@ -13,7 +13,7 @@ export type TypedChanges<C> = {
 
 export interface ElementDef {
   type: string | Type<any>
-  props: { children?: NodeDef | NodeDef[], [prop: string]: any }
+  props: { children?: NodeDef | NodeDef[], [prop: string]: any } | null
   key?: string | number | null
 }
 

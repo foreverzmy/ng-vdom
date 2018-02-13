@@ -46,9 +46,9 @@ jobs:
       
       - run: yarn test
 
-      - run: |
-          yarn global add codecov
-          codecov
+      - run: yarn global add codecov
+
+      - run: codecov
 
   lint:
     docker:

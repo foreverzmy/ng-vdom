@@ -1,3 +1,5 @@
+[![CircleCI](https://img.shields.io/circleci/project/github/trotyl/ng-vdom.svg)](https://circleci.com/gh/trotyl/ng-vdom)
+
 # ng-vdom
 
 Virtual DOM extenstion for Angular. (Not ready yet)

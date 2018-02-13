@@ -1,4 +1,5 @@
 [![CircleCI](https://img.shields.io/circleci/project/github/trotyl/ng-vdom.svg)](https://circleci.com/gh/trotyl/ng-vdom)
+[![Codecov](https://img.shields.io/codecov/c/github/trotyl/ng-vdom.svg)](https://codecov.io/gh/trotyl/ng-vdom)
 
 # ng-vdom
 

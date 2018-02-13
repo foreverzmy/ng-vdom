@@ -6,12 +6,13 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --prod",
-    "test": "ng test --single-run --code-coverage",
+    "test": "ng test --single-run --code-coverage --progress=false",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "pregenerate": "rimraf publish",
     "generate": "./build.sh",
-    "release": "cd publish && npm publish"
+    "release": "cd publish && npm publish",
+    "codecov": "codecov"
   },
   "private": true,
   "dependencies": {
@@ -36,6 +37,7 @@
     "@types/jasminewd2": "~2.0.2",
     "@types/node": "~6.0.60",
     "@types/react": "^16.0.30",
+    "codecov": "^3.0.0",
     "codelyzer": "^4.0.1",
     "jasmine-core": "~2.6.2",
     "jasmine-spec-reporter": "~4.1.0",
